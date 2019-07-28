@@ -7,7 +7,7 @@
 
 # testing
 /coverage
-
+/src/hoc1
 # production
 /build
 
