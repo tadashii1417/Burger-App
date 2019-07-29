@@ -73,3 +73,37 @@
 
 ============================================================
 ADD PROPS TYPE
+
+
+=================================================================
++ setState working asynchronously, so sometime not working right
+this.setState( (prevState, props) => {
+    return {
+        toggleClicked: prevState.toggleClicked + 1
+    }
+} );
+
++ check for props type: npm install --save prop-types
+> import PropTypes from 'prop-types'
+// below the definement of your class
+> Person.propTypes = {
+    click: PropTypes.func,
+    name: PropTypes.string,
+    age: PropTypes.number,
+    changed: PropTypes.func
+};
+
+> Reference to HTML tag !!!
++ ref !!!! ref = {(input) => {this.inputElement = input}}
++ this.inputElement.focus();
+
+> global state react: THE MEMO METHOD slide 
++ export const AuthContext = React.createContext({false});
++ <AuthContext.Provider value={this.state.authenticated}>{persons}</  
++ AuthContext.Provider>
+
++ import {AuthContext} from ""
++ <AuthContext.Consumer>
+    {auth => auth.xyz ? "Authenticated": null}
++ </ AuthContext.Consumer>
+
