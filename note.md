@@ -107,3 +107,20 @@ this.setState( (prevState, props) => {
     {auth => auth.xyz ? "Authenticated": null}
 + </ AuthContext.Consumer>
 
+=======================================================================
++ Aux = React.Fragment
++ Lazy Loading with condition component like (if ... else ...) or with different route loading 
+> import { Suspense } from 'react';
+> const Posts = React.lazy(() => import('../component/posts'));
+> <Route
+>   path ='/'
+>   render={() => (
+>   <Suspense fallback={<div>Loading ... </div>}>
+>     <Posts/>
+>   </Suspense>
+>   )}
+> />
+
++ set base path when deploy to server: in <BrowserRouter basename='/my-app'>
++ import { withRouter } from 'react-router-dom';
++ return withRouter(ABC);
