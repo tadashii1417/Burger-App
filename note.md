@@ -123,4 +123,236 @@ this.setState( (prevState, props) => {
 
 + set base path when deploy to server: in <BrowserRouter basename='/my-app'>
 + import { withRouter } from 'react-router-dom';
-+ return withRouter(ABC);
++ return withRouter(ABC);=sdfds
++ ============================================
+  Interesting !
+>   let transformedIngredients = Object.keys(props.ingredients)
+>   .map(igKey => {
+>     return [...Array(props.ingredients[igKey])].map((_, i)=>{
+>       return <BurgerIngredient type={igKey} key={igKey + i}/>;
+>     });
+>   })
+>   .reduce((arr, el)=>{
+>     return arr.concat(el)
+>   }, [])
+> ;
+===================================================================
+How to pass parameter through url request !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+> C1:
+    const queryParams = [];
+    for (let i in this.state.ingredients) {
+      queryParams.push(
+        encodeURIComponent(i) +
+          "=" +
+          encodeURIComponent(this.state.ingredients[i])
+      );
+    }
+    queryParams.push("price=" + this.props.price);
+
+    const queryString = queryParams.join("&");
+
+    console.log(this.props);
+    this.props.history.push({
+      pathname: "/checkout",
+      search: "?" + queryString
+    });
+>    -------------------------
+  componentWillMount() {
+    const query= new URLSearchParams(this.props.location.search);
+    const ingredients = {};
+    let price = 0;
+
+    for(let param of query.entries()) {
+      // ['salad', '1']
+      if(param[0] === 'price') {
+        price = param[1];
+      } else {
+        ingredients[param[0]] = +param[1];
+      }
+    }
+    this.setState({ingredients: ingredients, totalPrice: price});
+  }
+> C2: Using REDUX
+===================================================================
+> render route
+> render = {(props) => (<ContactData 
+            ingredients={this.props.ings} 
+            totalPrice={this.props.price}
+            {...props} />)}
+> component = {ContactData}
+
+===================================================================
+**REDUX**
+
+Global state store, having clear flow state change
+0. install redux
+1. create store at index.js
+   import {createStore} from 'redux';
+   import reducer from '';
+   import { Provider } from 'react-redux';
+
+   const store = createStore(reducer);
+
+   <Provider store={store}></App><Provider>
+
+2. create store folder: reducer.js
+   initialState ={
+     counter: 0
+   }
+
+> alway working in imuatable way !!!!!!
+   const reducer = (state = initialState, action) => {
+     if (action.type === 'INCREMENT') {
+       return {
+         ...state,
+         counter: state.counter + 1
+       }
+     }
+     else if (action.type === 'DECREMENT'){
+       return ...
+     }
+     return state;
+   }
+   export default reducer;
+
+3. install react-redux
+4. import { connect } from 'react-redux'; in Counter.js
+
+// after class
+const mapStateToProps = state => {
+  return {
+    count: state.counter
+  };
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onIncrementCounter: () => dispatch({type: 'INCREMENT'})
+    onDecrementCounter: () => dispatch({type: 'DECREMENT'})
+    onAdd: () => dispatch({type: 'ADD', val: 10})
+  }
+}
+
+// Thay vi su dung state.counter thi su dung this.props.count
+// clicked = {this.props.onIncrementCounter}
+// clicked = {this.props.onDecrementCounter}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Counter);
+
+> "IMMUTABLE way" object/array change:
+> object: {...state}
+> array: state.results.concat(state.counter) : create new array and add
+> array: state.results.filter(res => res.id !== action.id): create new and delete
+> newarray = [...array];
+
+5. in store folder: create actions.js to export identifier
+   export const INCREMENT = 'INCREMENT';
+   export const DECREMENT = 'DECREMENT';
+   export const ADD = 'ADD';
+then:
+  import * as actionTypes from './actions.js';
+  actionTypes.INCREMENT
+
+6. Use multiple reducers: Combine many into one.
+separate into many reducer by state
+> in store folder: create reducers folder
+> counter.js and result.js inside
+
+in the index.js file: 
+import {createStore, combineReducers} from 'redux';
+import counterReducer
+import resultReducer
+
+const rootReducer = combineReducer({
+  ctr: counterReducer,
+  res: resultReducer
+});
+ 
+ const store = createStore(rootReducer);
+ ------------------------
+ access global state by name define
+ ex: in mapStateToProps: ctr: state.ctr.counter
+                      state.res.result;
+
+> neu reducer nay su dung state o reducer khac
+> phai thong qua thuoc tinh moi cua action
+> luc goi o noi su dung
+> sau do pass tham so vao ham thuc thi. (chu ko dung global duoc vi chua combine.)
+
+??? When should use REDUX !
+--> client state: (isAuthen, ) which has been used by many other component !
+===================================================================================
++ in index.js
+  import { applyMiddleware, compose } from 'redux';
+
++ MIDDLEWARE
+// add redux debug
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+> const logger = store => {
+>   return nextFunc => {
+>     return action => {
+>       console.log('[Middleware] dispatching ...', action);
+>       const result = nextFunc(action);
+>       console.log('['Middleware'] next sate', store.getState());
+>       return result;
+>     }
+>   }
+> };
+
++ add middleware, connect to store
+  const store = createStore(rootReducer, composeEnhancers(applyMiddleware(logger)));
+=========================================================================
+*** Action creator**: in actions.js file
+> Allow run asynchronous code while 
+> reducer only for synchronous code
+
+export const increment = () => {
+  return  {
+    type: INCREMENT
+  };
+}
+
+export const add = (value) => {
+  return {
+    type: ADD,
+    val: value
+  }
+}
+
++ Using: import * as actionCreators from '../actions.js';
+note: pass increment va thuc thi luon
+
+>const mapDispatchToProps = dispatch => {
+  return {
+    onIncrementCounter: () => dispatch(actionCreators.increment())
+    onDecrementCounter: () => dispatch(actionCreators.decrement())
+    onAdd: () => dispatch(actionCreators.add(10))
+  }
+}
+=========================================================================
+> Inplement reduce asychronous code: REDUX_THUNK
+import thunk from 'redux-thunk';
+> const store = createStore(rootReducer, composeEnhancers(applyMiddleware(logger, thuck)));
+
+export const saveResult = (res) => {
+  return {
+    type: STORE_RESULT,
+    result: res
+  }
+}
+
+export const storeResult = (res) => {
+  return dispatch, getState => {
+    setTimeout( () => {
+      const oldCounter = getState().ctr.counter;
+      dispatch(saveResult(res));
+    }, 2000);
+  }
+}
+
+
+
+
+
+
